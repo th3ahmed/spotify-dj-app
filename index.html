@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpotifyDJ - Simple HTML Version</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1DB954 0%, #191414 100%);
+            color: #ffffff;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            color: #1DB954;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #b3b3b3;
+        }
+
+        .login-section {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 40px;
+            border-radius: 10px;
+            margin-bottom: 40px;
+        }
+
+        .btn {
+            background-color: #1DB954;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            background-color: #1ed760;
+            transform: scale(1.05);
+        }
+
+        .btn-secondary {
+            background-color: #6c5ce7;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5f49e6;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .playlist-section {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .playlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .playlist-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .playlist-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .track-list {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        .track-item {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            cursor: move;
+        }
+
+        .track-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .track-number {
+            width: 30px;
+            height: 30px;
+            background-color: #1DB954;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+
+        .track-info {
+            flex: 1;
+        }
+
+        .track-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .track-artist {
+            color: #b3b3b3;
+            font-size: 0.9rem;
+        }
+
+        .track-features {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .feature {
+            font-size: 0.8rem;
+        }
+
+        .feature-label {
+            color: #b3b3b3;
+        }
+
+        .feature-value {
+            color: #1DB954;
+            font-weight: bold;
+        }
+
+        .transition-label {
+            margin: 10px 0;
+            padding: 8px 15px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .transition-smooth { background-color: rgba(76, 175, 80, 0.8); }
+        .transition-creative { background-color: rgba(156, 39, 176, 0.8); }
+        .transition-high-energy { background-color: rgba(244, 67, 54, 0.8); }
+        .transition-technical { background-color: rgba(255, 87, 34, 0.8); }
+
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .status {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .loader {
+            border: 4px solid rgba(29, 185, 84, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #1DB954;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            color: #f44336;
+            background: rgba(244, 67, 54, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem; }
+            .playlist-grid { grid-template-columns: 1fr; }
+            .track-features { flex-direction: column; gap: 5px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>SpotifyDJ</h1>
+            <p>Transform your playlists into professional DJ sets</p>
+        </div>
+
+        <!-- Login Section -->
+        <div id="loginSection" class="login-section">
+            <h2>Connect to Spotify</h2>
+            <p>To use this app, you need to connect your Spotify account.</p>
+            <button class="btn" onclick="connectSpotify()">Connect with Spotify</button>
+            <div class="status">
+                <p><strong>Note:</strong> This is a simplified demo version. For full functionality, you need to set up the React application as described in the instructions.</p>
+            </div>
+        </div>
+
+        <!-- Demo Section -->
+        <div id="demoSection" class="hidden">
+            <div class="playlist-section">
+                <h2>Your Playlists</h2>
+                <p>Select a playlist to transform into a DJ set</p>
+                <div class="playlist-grid" id="playlistGrid">
+                    <!-- Playlists will be populated here -->
+                </div>
+            </div>
+
+            <div id="djSetSection" class="hidden">
+                <div class="controls">
+                    <button class="btn btn-secondary" onclick="regenerateSet()">Regenerate DJ Set</button>
+                    <button class="btn" onclick="exportSet()">Export DJ Set</button>
+                </div>
+
+                <div class="track-list">
+                    <h2>Your DJ Set</h2>
+                    <p>Tracks organized for optimal mixing. Drag to reorder.</p>
+                    <div id="trackList">
+                        <!-- Tracks will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration - Replace with your Spotify Client ID
+        const CLIENT_ID = 'd16dc7f05800471980a02f93fcf5e49a';
+        const REDIRECT_URI = window.location.origin;
+        const SCOPES = [
+            'user-read-private',
+            'user-read-email',
+            'playlist-read-private',
+            'playlist-read-collaborative'
+        ].join(' ');
+
+        let accessToken = null;
+        let currentUser = null;
+        let playlists = [];
+        let currentPlaylist = null;
+        let tracks = [];
+
+        // Demo data for when Spotify isn't connected
+        const demoPlaylists = [
+            { id: 'demo1', name: 'Electronic Vibes', tracks: { total: 25 } },
+            { id: 'demo2', name: 'House Party Mix', tracks: { total: 18 } },
+            { id: 'demo3', name: 'Chill Beats', tracks: { total: 32 } }
+        ];
+
+        const demoTracks = [
+            { id: '1', name: 'Strobe', artists: [{ name: 'Deadmau5' }], tempo: 128, key: 'Am', energy: 0.8 },
+            { id: '2', name: 'Midnight City', artists: [{ name: 'M83' }], tempo: 104, key: 'Fm', energy: 0.7 },
+            { id: '3', name: 'One More Time', artists: [{ name: 'Daft Punk' }], tempo: 123, key: 'Em', energy: 0.9 },
+            { id: '4', name: 'Levels', artists: [{ name: 'Avicii' }], tempo: 126, key: 'Cm', energy: 0.85 },
+            { id: '5', name: 'Titanium', artists: [{ name: 'David Guetta ft. Sia' }], tempo: 126, key: 'Fm', energy: 0.8 }
+        ];
+
+        // Check for access token in URL
+        function getTokenFromUrl() {
+            const hash = window.location.hash.substring(1);
+            const params = new URLSearchParams(hash);
+            return params.get('access_token');
+        }
+
+        // Initialize the app
+        function init() {
+            accessToken = getTokenFromUrl();
+            if (accessToken) {
+                // Clear the hash from URL
+                window.location.hash = '';
+                showDemo();
+            } else {
+                // Show demo with sample data
+                setTimeout(showDemo, 1000);
+            }
+        }
+
+        // Connect to Spotify
+        function connectSpotify() {
+            if (!CLIENT_ID || CLIENT_ID === 'YOUR_SPOTIFY_CLIENT_ID') {
+                alert('Please set up your Spotify Client ID in the code first!');
+                return;
+            }
+
+            const authUrl = `https://accounts.spotify.com/authorize?` +
+                `response_type=token&` +
+                `client_id=${CLIENT_ID}&` +
+                `scope=${encodeURIComponent(SCOPES)}&` +
+                `redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+            
+            window.location = authUrl;
+        }
+
+        // Show demo section
+        function showDemo() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('demoSection').classList.remove('hidden');
+            loadPlaylists();
+        }
+
+        // Load playlists (demo data)
+        function loadPlaylists() {
+            const grid = document.getElementById('playlistGrid');
+            
+            demoPlaylists.forEach(playlist => {
+                const card = document.createElement('div');
+                card.className = 'playlist-card';
+                card.onclick = () => selectPlaylist(playlist);
+                card.innerHTML = `
+                    <h3>${playlist.name}</h3>
+                    <p>${playlist.tracks.total} tracks</p>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Select a playlist
+        function selectPlaylist(playlist) {
+            currentPlaylist = playlist;
+            document.getElementById('djSetSection').classList.remove('hidden');
+            
+            // Simulate track analysis
+            showStatus('Analyzing tracks and creating DJ set...', true);
+            
+            setTimeout(() => {
+                tracks = [...demoTracks];
+                organizeForDJSet();
+                displayTracks();
+                hideStatus();
+            }, 2000);
+        }
+
+        // Organize tracks for DJ set (simplified algorithm)
+        function organizeForDJSet() {
+            // Simple sorting by tempo and energy for demo
+            tracks.sort((a, b) => {
+                const aScore = a.tempo * 0.6 + a.energy * 40;
+                const bScore = b.tempo * 0.6 + b.energy * 40;
+                return aScore - bScore;
+            });
+        }
+
+        // Display tracks
+        function displayTracks() {
+            const trackList = document.getElementById('trackList');
+            trackList.innerHTML = '';
+
+            tracks.forEach((track, index) => {
+                const trackElement = document.createElement('div');
+                trackElement.className = 'track-item';
+                trackElement.draggable = true;
+                trackElement.ondragstart = (e) => e.dataTransfer.setData('text/plain', index);
+                trackElement.ondragover = (e) => e.preventDefault();
+                trackElement.ondrop = (e) => {
+                    e.preventDefault();
+                    const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                    const toIndex = index;
+                    moveTrack(fromIndex, toIndex);
+                };
+
+                trackElement.innerHTML = `
+                    <div class="track-number">${index + 1}</div>
+                    <div class="track-info">
+                        <div class="track-name">${track.name}</div>
+                        <div class="track-artist">${track.artists.map(a => a.name).join(', ')}</div>
+                        <div class="track-features">
+                            <div class="feature">
+                                <span class="feature-label">BPM:</span>
+                                <span class="feature-value">${track.tempo}</span>
+                            </div>
+                            <div class="feature">
+                                <span class="feature-label">Key:</span>
+                                <span class="feature-value">${track.key}</span>
+                            </div>
+                            <div class="feature">
+                                <span class="feature-label">Energy:</span>
+                                <span class="feature-value">${(track.energy * 100).toFixed(0)}%</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                trackList.appendChild(trackElement);
+
+                // Add transition label (except for last track)
+                if (index < tracks.length - 1) {
+                    const transition = getTransitionType(track, tracks[index + 1]);
+                    const transitionElement = document.createElement('div');
+                    transitionElement.className = `transition-label transition-${transition.type}`;
+                    transitionElement.textContent = `${transition.emoji} ${transition.label}`;
+                    trackList.appendChild(transitionElement);
+                }
+            });
+        }
+
+        // Get transition type between two tracks
+        function getTransitionType(track1, track2) {
+            const tempoDiff = Math.abs(track1.tempo - track2.tempo);
+            const energyDiff = track2.energy - track1.energy;
+
+            if (tempoDiff < 3 && Math.abs(energyDiff) < 0.1) {
+                return { type: 'smooth', label: 'Smooth Transition', emoji: '🔄' };
+            } else if (energyDiff > 0.1) {
+                return { type: 'high-energy', label: 'Energy Build', emoji: '⚡' };
+            } else if (tempoDiff > 10) {
+                return { type: 'technical', label: 'Technical Mix', emoji: '🔧' };
+            } else {
+                return { type: 'creative', label: 'Creative Mix', emoji: '🎨' };
+            }
+        }
+
+        // Move track in the list
+        function moveTrack(fromIndex, toIndex) {
+            if (fromIndex !== toIndex) {
+                const track = tracks.splice(fromIndex, 1)[0];
+                tracks.splice(toIndex, 0, track);
+                displayTracks();
+            }
+        }
+
+        // Regenerate DJ set
+        function regenerateSet() {
+            showStatus('Regenerating DJ set...', true);
+            setTimeout(() => {
+                // Shuffle and re-organize
+                tracks = tracks.sort(() => Math.random() - 0.5);
+                organizeForDJSet();
+                displayTracks();
+                hideStatus();
+            }, 1500);
+        }
+
+        // Export DJ set
+        function exportSet() {
+            const setlist = tracks.map((track, index) => 
+                `${index + 1}. ${track.name} - ${track.artists.map(a => a.name).join(', ')}`
+            ).join('\n');
+
+            const blob = new Blob([setlist], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${currentPlaylist.name}_DJ_Set.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            showStatus('DJ set exported successfully!');
+            setTimeout(hideStatus, 3000);
+        }
+
+        // Show status message
+        function showStatus(message, loading = false) {
+            const status = document.createElement('div');
+            status.id = 'statusMessage';
+            status.className = 'status';
+            status.innerHTML = loading ? 
+                `<div class="loader"></div><p>${message}</p>` : 
+                `<p>${message}</p>`;
+            
+            document.querySelector('.container').appendChild(status);
+        }
+
+        // Hide status message
+        function hideStatus() {
+            const status = document.getElementById('statusMessage');
+            if (status) {
+                status.remove();
+            }
+        }
+
+        // Initialize the app when page loads
+        window.onload = init;
+    </script>
+</body>
+</html>
